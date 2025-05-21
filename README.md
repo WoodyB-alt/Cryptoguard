@@ -1,15 +1,22 @@
 # Cryptoguard 🔐
 
-A simple AES-256 encryption and decryption CLI tool built in Go.
+**Cryptoguard** is a simple AES-256 encryption and decryption CLI tool written in Go.
 
-## Features
-- AES-256 symmetric encryption using CFB mode
-- SHA-256 derived password key
-- Base64 encoding for output
-- CLI interface
+Use it to securely encrypt and decrypt both text and files with password-based encryption.
 
-## Usage
+---
 
-### Encrypt a message:
+## ✨ Features
+
+- 🔐 AES-256 symmetric encryption (CFB mode)
+- 🧂 SHA-256 derived password key
+- 🧾 Base64 encoding for output
+- 💻 Easy-to-use CLI interface
+- 📂 File encryption and decryption support
+
+---
+
+## 🛠️ Build
+
 ```bash
-cryptoguard encrypt "Hello World" -p "mypassword"
+go build -o cryptoguard
