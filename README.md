@@ -22,36 +22,42 @@ Use it to securely encrypt and decrypt both **text and files** with password-bas
 
 ```bash
 go build -o cryptoguard
+```
+## 📦 Usage
 
-##📦 Usage
-
-###🔐 Encrypt a text message
+### 🔐 Encrypt a text message
+```bash
 -./cryptoguard encrypt -p "mypassword" "Hello World"
+```
 
-###🔓 Decrypt a text message
--./cryptoguard decrypt -p "mypassword" "base64_ciphertext_here"
+### 🔓 Decrypt a text message
+```bash
+./cryptoguard decrypt -p "mypassword" "base64_ciphertext_here"
+```
 
-###📁 Encrypt a file
--./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
-
+### 📁 Encrypt a file
+```bash
+./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
+```
 --secret.txt: The input file to encrypt.
 --secret.enc: The encrypted output file (IV + base64 encoded).
 
-###📁 Decrypt a file
--./cryptoguard decrypt-file -p "mypassword" secret.enc recovered.txt
-
+### 📁 Decrypt a file
+```bash
+./cryptoguard decrypt-file -p "mypassword" secret.enc recovered.txt
+```
 --secret.enc: Encrypted input file.
 --recovered.txt: Output file with decrypted content.
 
-##📌 Notes
+## 📌 Notes
 
--Each file encryption uses a secure, random IV (initialization vector).
+- Each file encryption uses a secure, random IV (initialization vector).
 
--IV is prepended to the encrypted file automatically.
+- IV is prepended to the encrypted file automatically.
 
--All encrypted output is Base64 encoded for safe transport/storage.
+- All encrypted output is Base64 encoded for safe transport/storage.
 
--Use strong passwords for best results — SHA-256 is fast but not slow-hash protected (upgradeable in future).
+- Use strong passwords for best results — SHA-256 is fast but not slow-hash protected (upgradeable in future).
 
-##🧑‍💻 Author
-Blake Wood — 2024 Cybersecurity CLI Project
+## 🧑‍💻 Author
+- Blake Wood — 2024 Cybersecurity CLI Project
