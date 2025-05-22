@@ -39,15 +39,15 @@ go build -o cryptoguard
 ```bash
 ./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
 ```
---secret.txt: The input file to encrypt.
---secret.enc: The encrypted output file (IV + base64 encoded).
+- secret.txt: The input file to encrypt.
+- secret.enc: The encrypted output file (IV + base64 encoded).
 
 ### 📁 Decrypt a file
 ```bash
 ./cryptoguard decrypt-file -p "mypassword" secret.enc recovered.txt
 ```
---secret.enc: Encrypted input file.
---recovered.txt: Output file with decrypted content.
+- secret.enc: Encrypted input file.
+- recovered.txt: Output file with decrypted content.
 
 ## 📌 Notes
 
