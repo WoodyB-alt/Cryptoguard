@@ -1,19 +1,20 @@
 # Cryptoguard 🔐
 
-**Cryptoguard** is a simple AES-256 encryption and decryption CLI tool written in Go.
+**Cryptoguard** is a secure AES-256 encryption and decryption CLI tool written in Go.
 
-Use it to securely encrypt and decrypt both **text and files** with password-based encryption. Perfect for quick local secrets management or practicing secure CLI tooling.
+Use it to encrypt and decrypt both **text and files** using password-based encryption and modern key derivation. Ideal for local secrets management, practice, or lightweight secure storage.
 
 ---
 
 ## ✨ Features
 
 - 🔐 AES-256 symmetric encryption (CFB mode)
-- 🧂 SHA-256 derived password key
-- 🔑 Password-based key derivation
-- 🧾 Base64 encoding for safe output
+- 🧂 PBKDF2 password-based key derivation with SHA-256
+- 🔑 Per-encryption random salt generation
+- 🔁 100,000 iteration key stretching for brute-force resistance
+- 🧾 Base64 encoding for safe output and transport
 - 💻 Easy-to-use CLI interface
-- 📂 File encryption and decryption support
+- 📂 Secure file encryption and decryption support
 - 📦 Clean and modular Go code structure
 
 ---
@@ -51,13 +52,21 @@ go build -o cryptoguard
 
 ## 📌 Notes
 
-- Each file encryption uses a secure, random IV (initialization vector).
+- 🔐 PBKDF2 is used for password-based key derivation with:
 
-- IV is prepended to the encrypted file automatically.
+- Random 128-bit salt per encryption
 
-- All encrypted output is Base64 encoded for safe transport/storage.
+- 100,000 iterations
 
-- Use strong passwords for best results — SHA-256 is fast but not slow-hash protected (upgradeable in future).
+- SHA-256 as the hashing algorithm
+
+- 🔁 IV (Initialization Vector) is randomly generated for each file and stored alongside the ciphertext.
+
+- 🧾 Encrypted output is always Base64 encoded to allow safe text/file handling.
+
+- 🚨 Use strong passwords — the security of symmetric encryption depends on it.
+
+
 
 ## 🧑‍💻 Author
 - Blake Wood — 2024 Cybersecurity CLI Project

@@ -31,7 +31,11 @@ func EncryptFile(inputPath, outputPath, password string) error {
 	defer outFile.Close()
 
 	// Derive the encryption key from the password
-	key := deriveKey(password)
+	salt := make([]byte, saltSize)
+	if _, err := rand.Read(salt); err != nil {
+		return err
+	}
+	key := deriveKeyPBKDF2([]byte(password), salt)
 
 	// Create AES cipher block
 	block, err := aes.NewCipher(key)
@@ -45,7 +49,8 @@ func EncryptFile(inputPath, outputPath, password string) error {
 		return err
 	}
 
-	// Write IV to the start of the output file (not encrypted)
+	// Write Salt and IV to the start of the output file (not encrypted)
+	outFile.Write(salt)
 	outFile.Write(iv)
 
 	// Wrap the writer with AES stream and base64 encoder
@@ -82,7 +87,11 @@ func DecryptFile(inputPath, outputPath, password string) error {
 	defer outFile.Close()
 
 	// Derive the key from the password
-	key := deriveKey(password)
+	salt := make([]byte, saltSize)
+	if _, err := io.ReadFull(inFile, salt); err != nil {
+		return err
+	}
+	key := deriveKeyPBKDF2([]byte(password), salt)
 
 	// Read the IV (first 16 bytes of the input file)
 	iv := make([]byte, aes.BlockSize)
