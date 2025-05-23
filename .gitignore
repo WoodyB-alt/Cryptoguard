@@ -1,4 +1,1 @@
-echo Cryptoguard > .gitignore
-echo "*.exe" >> .gitignore
-echo "*.log" >> .gitignore
-echo "*.DS_Store" >> .gitignore
+Cryptoguard
