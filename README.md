@@ -2,7 +2,7 @@
 
 **Cryptoguard** is a secure AES-256 encryption and decryption CLI tool written in Go.
 
-Use it to encrypt and decrypt both **text and files** using password-based encryption and modern key derivation. Ideal for local secrets management, practice, or lightweight secure storage.
+Use it to encrypt and decrypt **text, files, and folders** using password-based encryption with modern key derivation. Ideal for local secrets management, practice, or lightweight secure storage.
 
 ---
 
@@ -15,6 +15,7 @@ Use it to encrypt and decrypt both **text and files** using password-based encry
 - 🧾 Base64 encoding for safe output and transport
 - 💻 Easy-to-use CLI interface
 - 📂 Secure file encryption and decryption support
+- 📂 Recursive folder encryption and decryption with `--recursive`
 - 📦 Clean and modular Go code structure
 
 ---
@@ -43,12 +44,20 @@ go build -o cryptoguard
 - secret.txt: The input file to encrypt.
 - secret.enc: The encrypted output file (IV + base64 encoded).
 
-### 📁 Decrypt a file
+### 📂 Encrypt an entire folder (recursive)
 ```bash
-./cryptoguard decrypt-file -p "mypassword" secret.enc recovered.txt
+./cryptoguard encrypt-folder -p "mypassword" --recursive ./mydocs ./encrypted_docs
 ```
-- secret.enc: Encrypted input file.
-- recovered.txt: Output file with decrypted content.
+- Recursively encrypts all files from ./mydocs to ./encrypted_docs
+- Retains directory structure and appends .enc to each file
+
+### 📁 Decrypt an entire folder (recursive)
+```bash
+./cryptoguard decrypt-folder -p "mypassword" --recursive ./encrypted_docs ./mydocs_copy
+```
+- Decrypts all .enc files in ./encrypted_docs into ./mydocs_copy
+- Preserves original folder structure
+
 
 ## 📌 Notes
 

@@ -20,13 +20,21 @@ func printHelp() {
 	decrypt        Decrypt a base64 string with a password
 	encrypt-file   Encrypt a file with a password
 	decrypt-file   Decrypt a file with a password
+	encrypt-folder   Recursively encrypt all files in a folder
+  	decrypt-folder   Recursively decrypt all .enc files in a folder
 	help           Show this help message
+
+	Global Flags:
+ 	-p               Password used for encryption/decryption
+	--recursive      Include subdirectories (used with folder commands)
 
 	Examples:
 	cryptoguard encrypt -p "mypassword" "Secret text"
 	cryptoguard decrypt -p "mypassword" "base64cipher"
 	cryptoguard encrypt-file -p "mypassword" input.txt output.enc
 	cryptoguard decrypt-file -p "mypassword" input.enc output.txt
+	cryptoguard encrypt-folder -p "mypassword" --recursive ./input ./encrypted
+  	cryptoguard decrypt-folder -p "mypassword" --recursive ./encrypted ./decrypted
 	`)
 }
 
@@ -51,6 +59,10 @@ func main() {
 	case "decrypt-file":
 		// Decrypt a file
 		cmd.DecryptFile(os.Args[2:])
+	case "encrypt-folder":
+		cmd.EncryptFolder(os.Args[2:])
+	case "decrypt-folder":
+		cmd.DecryptFolder(os.Args[2:])
 	default:
 		// Handle unknown commands
 		fmt.Println("Unknown command:", os.Args[1])
