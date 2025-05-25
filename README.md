@@ -2,19 +2,19 @@
 
 **Cryptoguard** is a secure AES-256 encryption and decryption CLI tool written in Go.
 
-Use it to encrypt and decrypt **text, files, and folders** using password-based encryption with modern key derivation. Ideal for local secrets management, practice, or lightweight secure storage.
+Use it to encrypt and decrypt **text, files, and folders** using password-based encryption with modern key derivation and **authenticated encryption (AES-GCM)**. Ideal for local secrets management, practice, or lightweight secure storage.
 
 ---
 
 ## ✨ Features
 
-- 🔐 AES-256 symmetric encryption (CFB mode)
+- 🔐 AES-256 authenticated encryption using AES-GCM mode
 - 🧂 PBKDF2 password-based key derivation with SHA-256
-- 🔑 Per-encryption random salt generation
+- 🔑 Per-encryption random salt generation (128-bit)
 - 🔁 100,000 iteration key stretching for brute-force resistance
 - 🧾 Base64 encoding for safe output and transport
 - 💻 Easy-to-use CLI interface
-- 📂 Secure file encryption and decryption support
+- 📁 Secure file encryption and decryption
 - 📂 Recursive folder encryption and decryption with `--recursive`
 - 📦 Clean and modular Go code structure
 
@@ -44,6 +44,13 @@ go build -o cryptoguard
 - secret.txt: The input file to encrypt.
 - secret.enc: The encrypted output file (IV + base64 encoded).
 
+### 🔓 Decrypt a text message
+```bash
+./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
+```
+- secret.txt: The input file to Decrypt.
+- secret.enc: The Decrypted output file (IV + base64 encoded).
+
 ### 📂 Encrypt an entire folder (recursive)
 ```bash
 ./cryptoguard encrypt-folder -p "mypassword" --recursive ./mydocs ./encrypted_docs
@@ -61,19 +68,19 @@ go build -o cryptoguard
 
 ## 📌 Notes
 
-- 🔐 PBKDF2 is used for password-based key derivation with:
+- AES-GCM provides authenticated encryption — tampered or incorrectly decrypted data will fail securely
+
+- PBKDF2 is used for password-based key derivation with:
 
 - Random 128-bit salt per encryption
 
-- 100,000 iterations
+- 100,000 SHA-256 iterations
 
-- SHA-256 as the hashing algorithm
+- A 96-bit random nonce (IV) is generated for every encryption
 
-- 🔁 IV (Initialization Vector) is randomly generated for each file and stored alongside the ciphertext.
+- Encrypted output is Base64 encoded for safe storage and transport
 
-- 🧾 Encrypted output is always Base64 encoded to allow safe text/file handling.
-
-- 🚨 Use strong passwords — the security of symmetric encryption depends on it.
+- Always use strong, unique passwords — encryption strength depends on it
 
 
 

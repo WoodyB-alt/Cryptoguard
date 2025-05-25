@@ -4,19 +4,19 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"io"
 	"os"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
-// deriveKey creates a 256-bit key from a password using SHA-256.
-// This is a quick method but could be replaced by PBKDF2/scrypt later.
-
-// EncryptFile encrypts a file using AES in CFB mode and saves the result to a new file.
-// The IV is randomly generated and prepended to the output.
-// The output is base64-encoded.
+// EncryptFile encrypts the contents of a file using AES-GCM and writes to a new file.
+// Output format: salt + nonce + base64(ciphertext)
 func EncryptFile(inputPath, outputPath, password string) error {
-	// Open the input file
+	// Open the input file for reading
 	inFile, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -30,12 +30,14 @@ func EncryptFile(inputPath, outputPath, password string) error {
 	}
 	defer outFile.Close()
 
-	// Derive the encryption key from the password
+	// Generate random salt
 	salt := make([]byte, saltSize)
 	if _, err := rand.Read(salt); err != nil {
 		return err
 	}
-	key := deriveKeyPBKDF2([]byte(password), salt)
+
+	// Derive key from password and salt using PBKDF2
+	key := pbkdf2.Key([]byte(password), salt, iterations, keyLen, sha256.New)
 
 	// Create AES cipher block
 	block, err := aes.NewCipher(key)
@@ -43,80 +45,93 @@ func EncryptFile(inputPath, outputPath, password string) error {
 		return err
 	}
 
-	// Generate a secure random IV
-	iv := make([]byte, aes.BlockSize)
-	if _, err := rand.Read(iv); err != nil {
-		return err
-	}
-
-	// Write Salt and IV to the start of the output file (not encrypted)
-	outFile.Write(salt)
-	outFile.Write(iv)
-
-	// Wrap the writer with AES stream and base64 encoder
-	stream := cipher.NewCFBEncrypter(block, iv)
-	writer := &cipher.StreamWriter{
-		S: stream,
-		W: base64.NewEncoder(base64.StdEncoding, outFile),
-	}
-
-	// Copy file contents through the encryption writer
-	_, err = io.Copy(writer, inFile)
+	// Create AES-GCM cipher mode
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// Generate a random nonce
+	nonce := make([]byte, nonceSize)
+	if _, err := rand.Read(nonce); err != nil {
+		return err
+	}
+
+	// Read input file into memory
+	plainData, err := io.ReadAll(inFile)
+	if err != nil {
+		return err
+	}
+
+	// Encrypt the plaintext data
+	cipherData := gcm.Seal(nil, nonce, plainData, nil)
+
+	// Combine salt + nonce + ciphertext
+	final := append(salt, nonce...)
+	final = append(final, cipherData...)
+
+	// Base64 encode the result before writing to file
+	encoder := base64.NewEncoder(base64.StdEncoding, outFile)
+	defer encoder.Close()
+
+	_, err = encoder.Write(final)
+	return err
 }
 
-// DecryptFile reads an encrypted file, extracts the IV, and decrypts the contents.
-// Assumes IV is prepended and contents are base64 encoded.
+// DecryptFile decrypts a file encrypted with AES-GCM and PBKDF2.
+// Input format must be: base64(salt + nonce + ciphertext)
 func DecryptFile(inputPath, outputPath, password string) error {
-	// Open the encrypted input file
+	// Open the encrypted file
 	inFile, err := os.Open(inputPath)
 	if err != nil {
 		return err
 	}
 	defer inFile.Close()
 
-	// Create the decrypted output file
+	// Create the output file
 	outFile, err := os.Create(outputPath)
 	if err != nil {
 		return err
 	}
 	defer outFile.Close()
 
-	// Derive the key from the password
-	salt := make([]byte, saltSize)
-	if _, err := io.ReadFull(inFile, salt); err != nil {
-		return err
-	}
-	key := deriveKeyPBKDF2([]byte(password), salt)
-
-	// Read the IV (first 16 bytes of the input file)
-	iv := make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(inFile, iv); err != nil {
+	// Base64 decode the entire input
+	decoder := base64.NewDecoder(base64.StdEncoding, inFile)
+	rawData, err := io.ReadAll(decoder)
+	if err != nil {
 		return err
 	}
 
-	// Create AES cipher block
+	if len(rawData) < saltSize+nonceSize {
+		return errors.New("invalid encrypted file format")
+	}
+
+	// Extract salt, nonce, and ciphertext
+	salt := rawData[:saltSize]
+	nonce := rawData[saltSize : saltSize+nonceSize]
+	cipherData := rawData[saltSize+nonceSize:]
+
+	// Derive key from password and salt
+	key := pbkdf2.Key([]byte(password), salt, iterations, keyLen, sha256.New)
+
+	// Create AES cipher and GCM mode
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return err
 	}
 
-	// Wrap the input with a base64 decoder and decrypt stream
-	stream := cipher.NewCFBDecrypter(block, iv)
-	reader := &cipher.StreamReader{
-		S: stream,
-		R: base64.NewDecoder(base64.StdEncoding, inFile),
-	}
-
-	// Copy the decrypted content to the output file
-	_, err = io.Copy(outFile, reader)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// Decrypt and verify the ciphertext
+	plainData, err := gcm.Open(nil, nonce, cipherData, nil)
+	if err != nil {
+		return errors.New("decryption failed: possibly incorrect password or tampered file")
+	}
+
+	// Write decrypted data to output file
+	_, err = outFile.Write(plainData)
+	return err
 }
