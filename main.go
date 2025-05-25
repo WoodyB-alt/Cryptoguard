@@ -63,6 +63,8 @@ func main() {
 		cmd.EncryptFolder(os.Args[2:])
 	case "decrypt-folder":
 		cmd.DecryptFolder(os.Args[2:])
+	case "decrypt-zip":
+		cmd.DecryptZip(os.Args[2:])
 	default:
 		// Handle unknown commands
 		fmt.Println("Unknown command:", os.Args[1])

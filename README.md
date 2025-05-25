@@ -17,6 +17,8 @@ Use it to encrypt and decrypt **text, files, and folders** using password-based 
 - 📁 Secure file encryption and decryption
 - 📂 Recursive folder encryption and decryption with `--recursive`
 - 🧼 Optional `--delete-original` flag to securely remove plaintext
+- 📦 `--zip` flag to compress + encrypt folders
+- 🔓 `decrypt-zip` support to auto-decrypt and extract encrypted zip archives
 - 📊 Progress bar during folder encryption
 - 📦 Clean and modular Go code structure
 
@@ -43,22 +45,25 @@ go build -o cryptoguard
 ```bash
 ./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
 ```
-- secret.txt: The input file to encrypt.
-- secret.enc: The encrypted output file (IV + base64 encoded).
+- secret.txt: The input file to encrypt
+- secret.enc: The AES-GCM + base64 encrypted output file
+- Optional: Add --delete-original to remove secret.txt after encryption
 
 ### 🔓 Decrypt a file message
 ```bash
-./cryptoguard encrypt-file -p "mypassword" secret.enc secret.txt
+./cryptoguard decrypt-file -p "mypassword" secret.enc recovered.txt
 ```
-- secret.txt: The input file to Decrypt.
-- secret.enc: The Decrypted output file (IV + base64 encoded).
+- secret.enc: The encrypted file
+- recovered.txt: The output file after decryption
 
 ### 📂 Encrypt an entire folder (recursive)
 ```bash
 ./cryptoguard encrypt-folder -p "mypassword" --recursive --delete-original ./mydocs ./encrypted_docs
 ```
-- Recursively encrypts all files from ./mydocs to ./encrypted_docs
+- Recursively encrypts all files from ./mydocs into ./encrypted_docs
 - Retains directory structure and appends .enc to each file
+- Shows a progress bar while encrypting
+- Add --delete-original to remove the source files after encryption
 
 ### 📁 Decrypt an entire folder (recursive)
 ```bash
@@ -67,6 +72,21 @@ go build -o cryptoguard
 - Decrypts all .enc files in ./encrypted_docs into ./mydocs_copy
 - Preserves original folder structure
 
+### 📦 Zip and Encrypt a Folder
+```bash
+./cryptoguard encrypt-folder -p "mypassword" --zip --delete-original ./mydocs ./backups
+```
+- Compresses ./mydocs into a .zip file
+- Encrypts the .zip to .zip.enc
+- Add --delete-original to remove both the folder and .zip file after encryption
+
+### 📦 Zip and Decrypt a Folder
+```bash
+./cryptoguard decrypt-zip -p "mypassword" --delete-original backups/mydocs.zip.enc ./restored_docs
+```
+- Decrypts the .zip.enc file
+- Extracts the resulting zip archive into ./restored_docs
+- Add --delete-original to remove both .zip and .zip.enc after extraction
 
 ## 📌 Notes
 
