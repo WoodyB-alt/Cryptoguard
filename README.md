@@ -16,6 +16,8 @@ Use it to encrypt and decrypt **text, files, and folders** using password-based 
 - 💻 Easy-to-use CLI interface
 - 📁 Secure file encryption and decryption
 - 📂 Recursive folder encryption and decryption with `--recursive`
+- 🧼 Optional `--delete-original` flag to securely remove plaintext
+- 📊 Progress bar during folder encryption
 - 📦 Clean and modular Go code structure
 
 ---
@@ -44,16 +46,16 @@ go build -o cryptoguard
 - secret.txt: The input file to encrypt.
 - secret.enc: The encrypted output file (IV + base64 encoded).
 
-### 🔓 Decrypt a text message
+### 🔓 Decrypt a file message
 ```bash
-./cryptoguard encrypt-file -p "mypassword" secret.txt secret.enc
+./cryptoguard encrypt-file -p "mypassword" secret.enc secret.txt
 ```
 - secret.txt: The input file to Decrypt.
 - secret.enc: The Decrypted output file (IV + base64 encoded).
 
 ### 📂 Encrypt an entire folder (recursive)
 ```bash
-./cryptoguard encrypt-folder -p "mypassword" --recursive ./mydocs ./encrypted_docs
+./cryptoguard encrypt-folder -p "mypassword" --recursive --delete-original ./mydocs ./encrypted_docs
 ```
 - Recursively encrypts all files from ./mydocs to ./encrypted_docs
 - Retains directory structure and appends .enc to each file
@@ -79,6 +81,8 @@ go build -o cryptoguard
 - A 96-bit random nonce (IV) is generated for every encryption
 
 - Encrypted output is Base64 encoded for safe storage and transport
+
+- Use --delete-original to automatically wipe plaintext files/folders post-encryption
 
 - Always use strong, unique passwords — encryption strength depends on it
 
