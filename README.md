@@ -2,7 +2,7 @@
 
 **Cryptoguard** is a secure AES-256 encryption and decryption CLI tool written in Go.
 
-Use it to encrypt and decrypt **text, files, and folders** using password-based encryption with modern key derivation and **authenticated encryption (AES-GCM)**. Ideal for local secrets management, practice, or lightweight secure storage.
+Use it to encrypt and decrypt **text, files, folders, or even hide data inside PNG images** using password-based encryption with modern key derivation and **authenticated encryption (AES-GCM)**. Ideal for local secrets management, practice, or lightweight secure storage.
 
 ---
 
@@ -16,9 +16,10 @@ Use it to encrypt and decrypt **text, files, and folders** using password-based 
 - 💻 Easy-to-use CLI interface
 - 📁 Secure file encryption and decryption
 - 📂 Recursive folder encryption and decryption with `--recursive`
-- 🧼 Optional `--delete-original` flag to securely remove plaintext
 - 📦 `--zip` flag to compress + encrypt folders
 - 🔓 `decrypt-zip` support to auto-decrypt and extract encrypted zip archives
+- 🧼 Optional `--delete-original` flag to securely remove plaintext
+- 🖼️ **Steganography Mode**: hide encrypted data in PNGs (`steg-embed` / `steg-extract`)
 - 📊 Progress bar during folder encryption
 - 📦 Clean and modular Go code structure
 
@@ -88,6 +89,22 @@ go build -o cryptoguard
 - Extracts the resulting zip archive into ./restored_docs
 - Add --delete-original to remove both .zip and .zip.enc after extraction
 
+### 🖼️ Embed Encrypted Text or File Inside a PNG
+```bash
+./cryptoguard steg-embed -p "mypassword" -in secret.txt -img carrier.png -out hidden.png
+```
+- Encrypts the file or text content
+- Embeds it into carrier.png using least significant bits (LSBs)
+- Saves the modified image as hidden.png
+
+### 🖼️ Extract and Decrypt from a PNG
+```bash
+./cryptoguard steg-extract -p "mypassword" -img hidden.png --out decrypted.txt
+```
+- Extracts hidden encrypted message
+- Decrypts it using your password
+- Optionally writes result to decrypted.txt
+
 ## 📌 Notes
 
 - AES-GCM provides authenticated encryption — tampered or incorrectly decrypted data will fail securely
@@ -103,6 +120,8 @@ go build -o cryptoguard
 - Encrypted output is Base64 encoded for safe storage and transport
 
 - Use --delete-original to automatically wipe plaintext files/folders post-encryption
+
+- PNG steganography is suitable for hidden, encrypted transmission
 
 - Always use strong, unique passwords — encryption strength depends on it
 

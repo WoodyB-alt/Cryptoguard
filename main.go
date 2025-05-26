@@ -65,6 +65,10 @@ func main() {
 		cmd.DecryptFolder(os.Args[2:])
 	case "decrypt-zip":
 		cmd.DecryptZip(os.Args[2:])
+	case "steg-embed":
+		cmd.StegEmbed(os.Args[2:])
+	case "steg-extract":
+		cmd.StegExtract(os.Args[2:])
 	default:
 		// Handle unknown commands
 		fmt.Println("Unknown command:", os.Args[1])
