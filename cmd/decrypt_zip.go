@@ -1,31 +1,49 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/WoodyB-alt/cryptoguard/internal/crypto"
+	"github.com/spf13/cobra"
 )
 
-// DecryptZip handles decryption of an encrypted .zip.enc file and extraction of its contents.
-func DecryptZip(args []string) {
-	fs := flag.NewFlagSet("decrypt-zip", flag.ExitOnError)
-	password := fs.String("p", "", "Password for decryption")
-	deleteOriginal := fs.Bool("delete-original", false, "Delete .zip and .enc file after successful extraction")
-	fs.Parse(args)
+var (
+	decryptZipPassword       string
+	decryptZipDeleteOriginal bool
+)
 
-	if fs.NArg() < 2 {
-		fmt.Println("Usage: cryptoguard decrypt-zip -p \"password\" --delete-original encrypted.zip.enc output_dir")
-		return
-	}
+// decryptZipCmd defines the Cobra command to decrypt a .zip.enc file and extract its contents.
+var decryptZipCmd = &cobra.Command{
+	Use:   "decrypt-zip [encrypted.zip.enc] [output_dir]",
+	Short: "Decrypt an encrypted .zip file and extract its contents",
+	Args:  cobra.ExactArgs(2), // Requires encrypted file and output directory
+	Run: func(cmd *cobra.Command, args []string) {
+		encPath := args[0]
+		outputDir := args[1]
 
-	encPath := fs.Arg(0)
-	outputDir := fs.Arg(1)
+		if decryptZipPassword == "" {
+			fmt.Println("Error: password is required. Use -p flag.")
+			return
+		}
 
-	err := crypto.DecryptZipFile(encPath, outputDir, *password, *deleteOriginal)
-	if err != nil {
-		fmt.Println("DecryptZip error:", err)
-		os.Exit(1)
-	}
+		// Perform decryption and extraction using internal logic
+		err := crypto.DecryptZipFile(encPath, outputDir, decryptZipPassword, decryptZipDeleteOriginal)
+		if err != nil {
+			fmt.Println("DecryptZip error:", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("Zip archive decrypted and extracted to:", outputDir)
+	},
+}
+
+func init() {
+	// Register CLI flags
+	decryptZipCmd.Flags().StringVarP(&decryptZipPassword, "password", "p", "", "Password to decrypt the zip file (required)")
+	decryptZipCmd.Flags().BoolVar(&decryptZipDeleteOriginal, "delete-original", false, "Delete .zip and .enc files after successful extraction")
+	decryptZipCmd.MarkFlagRequired("password")
+
+	// Add this command to the root
+	rootCmd.AddCommand(decryptZipCmd)
 }

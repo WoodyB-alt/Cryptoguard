@@ -1,35 +1,60 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/WoodyB-alt/cryptoguard/internal/crypto"
+	"github.com/spf13/cobra"
 )
 
-// EncryptFolder handles CLI input for encrypting folders.
-// Supports optional recursive walking, zipping, and original file deletion.
-func EncryptFolder(args []string) {
-	// Define CLI flags
-	fs := flag.NewFlagSet("encrypt-folder", flag.ExitOnError)
-	password := fs.String("p", "", "Password for encryption")
-	recursive := fs.Bool("recursive", false, "Recursively encrypt all files in subdirectories")
-	deleteOriginal := fs.Bool("delete-original", false, "Delete original files/folders after encryption")
-	zip := fs.Bool("zip", false, "Zip the entire folder before encrypting")
-	fs.Parse(args)
+var (
+	encryptFolderPassword       string
+	encryptFolderRecursive      bool
+	encryptFolderDeleteOriginal bool
+	encryptFolderZip            bool
+)
 
-	// Require input and output directory paths
-	if fs.NArg() < 2 {
-		fmt.Println("Usage: cryptoguard encrypt-folder -p \"password\" [--recursive] [--delete-original] [--zip] input_dir output_dir")
-		return
-	}
+// encryptFolderCmd defines the Cobra command for encrypting folders.
+var encryptFolderCmd = &cobra.Command{
+	Use:   "encrypt-folder <input_dir> <output_dir>",
+	Short: "Encrypt all files in a folder using AES-GCM (optionally recursive, zipped, or delete source)",
+	Args:  cobra.ExactArgs(2), // Input and output directories required
+	Run: func(cmd *cobra.Command, args []string) {
+		inputDir := args[0]
+		outputDir := args[1]
 
-	inputDir := fs.Arg(0)
-	outputDir := fs.Arg(1)
+		// Ensure password is provided
+		if encryptFolderPassword == "" {
+			fmt.Println("Error: password is required. Use -p flag.")
+			return
+		}
 
-	// Invoke the core encryption function with all options
-	err := crypto.EncryptFolder(inputDir, outputDir, *password, *recursive, *deleteOriginal, *zip)
-	if err != nil {
-		fmt.Println("Folder encryption error:", err)
-	}
+		// Call the core encryption logic
+		err := crypto.EncryptFolder(
+			inputDir,
+			outputDir,
+			encryptFolderPassword,
+			encryptFolderRecursive,
+			encryptFolderDeleteOriginal,
+			encryptFolderZip,
+		)
+
+		if err != nil {
+			fmt.Println("Folder encryption error:", err)
+		} else {
+			fmt.Println("Folder encrypted successfully:", outputDir)
+		}
+	},
+}
+
+func init() {
+	// CLI flags for folder encryption
+	encryptFolderCmd.Flags().StringVarP(&encryptFolderPassword, "password", "p", "", "Password for encryption (required)")
+	encryptFolderCmd.Flags().BoolVar(&encryptFolderRecursive, "recursive", false, "Recursively encrypt files in subdirectories")
+	encryptFolderCmd.Flags().BoolVar(&encryptFolderDeleteOriginal, "delete-original", false, "Delete original files/folders after encryption")
+	encryptFolderCmd.Flags().BoolVar(&encryptFolderZip, "zip", false, "Zip the folder before encryption")
+	encryptFolderCmd.MarkFlagRequired("password")
+
+	// Register command
+	rootCmd.AddCommand(encryptFolderCmd)
 }

@@ -1,46 +1,58 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/WoodyB-alt/cryptoguard/internal/crypto"
+	"github.com/spf13/cobra"
 )
 
-// EncryptFile handles command-line file encryption.
-// It supports optional deletion of the original file after successful encryption.
-func EncryptFile(args []string) {
-	// Define flags for password and optional deletion
-	fs := flag.NewFlagSet("encrypt-file", flag.ExitOnError)
-	password := fs.String("p", "", "Password for encryption")
-	deleteOriginal := fs.Bool("delete-original", false, "Delete input file after encryption")
-	fs.Parse(args)
+var (
+	encryptFilePassword     string
+	encryptFileDeleteSource bool
+)
 
-	// Expecting exactly 2 arguments: input and output file paths
-	if fs.NArg() < 2 {
-		fmt.Println("Usage: cryptoguard encrypt-file -p \"password\" [--delete-original] input.txt output.enc")
-		return
-	}
+// encryptFileCmd defines the "encrypt-file" Cobra command.
+var encryptFileCmd = &cobra.Command{
+	Use:   "encrypt-file <input> <output>",
+	Short: "Encrypt a file using AES-GCM",
+	Args:  cobra.ExactArgs(2), // Requires input and output file paths
+	Run: func(cmd *cobra.Command, args []string) {
+		inputPath := args[0]
+		outputPath := args[1]
 
-	inputPath := fs.Arg(0)
-	outputPath := fs.Arg(1)
-
-	// Perform file encryption using the provided password
-	err := crypto.EncryptFile(inputPath, outputPath, *password)
-	if err != nil {
-		fmt.Println("Encryption error:", err)
-		return
-	}
-
-	// If --delete-original is set, attempt to delete the input file
-	if *deleteOriginal {
-		if err := os.Remove(inputPath); err != nil {
-			fmt.Println("Warning: failed to delete original file:", err)
-		} else {
-			fmt.Println("Original file deleted:", inputPath)
+		if encryptFilePassword == "" {
+			fmt.Println("Error: password is required. Use -p flag.")
+			return
 		}
-	}
 
-	fmt.Println("File encrypted successfully:", outputPath)
+		// Encrypt the file with AES-GCM
+		err := crypto.EncryptFile(inputPath, outputPath, encryptFilePassword)
+		if err != nil {
+			fmt.Println("Encryption error:", err)
+			return
+		}
+
+		// If --delete-original is enabled, remove the source file
+		if encryptFileDeleteSource {
+			if err := os.Remove(inputPath); err != nil {
+				fmt.Println("Warning: failed to delete original file:", err)
+			} else {
+				fmt.Println("Original file deleted:", inputPath)
+			}
+		}
+
+		fmt.Println("File encrypted successfully:", outputPath)
+	},
+}
+
+func init() {
+	// Define CLI flags
+	encryptFileCmd.Flags().StringVarP(&encryptFilePassword, "password", "p", "", "Password for encryption")
+	encryptFileCmd.Flags().BoolVar(&encryptFileDeleteSource, "delete-original", false, "Delete input file after encryption")
+	encryptFileCmd.MarkFlagRequired("password")
+
+	// Register with the root command
+	rootCmd.AddCommand(encryptFileCmd)
 }

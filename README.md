@@ -22,6 +22,7 @@ Use it to encrypt and decrypt **text, files, folders, or even hide data inside P
 - 🖼️ **Steganography Mode**: hide encrypted data in PNGs (`steg-embed` / `steg-extract`)
 - 📊 Progress bar during folder encryption
 - 📦 Clean and modular Go code structure
+- 🧩 Modular Go code (internal/crypto and internal/steg)
 
 ---
 
@@ -34,7 +35,7 @@ go build -o cryptoguard
 
 ### 🔐 Encrypt a text message
 ```bash
--./cryptoguard encrypt -p "mypassword" "Hello World"
+./cryptoguard encrypt -p "mypassword" "Hello World"
 ```
 
 ### 🔓 Decrypt a text message
@@ -81,7 +82,7 @@ go build -o cryptoguard
 - Encrypts the .zip to .zip.enc
 - Add --delete-original to remove both the folder and .zip file after encryption
 
-### 📦 Zip and Decrypt a Folder
+### 📦 Decrypt + Extract Encrypted Zip
 ```bash
 ./cryptoguard decrypt-zip -p "mypassword" --delete-original backups/mydocs.zip.enc ./restored_docs
 ```
@@ -91,7 +92,7 @@ go build -o cryptoguard
 
 ### 🖼️ Embed Encrypted Text or File Inside a PNG
 ```bash
-./cryptoguard steg-embed -p "mypassword" -in secret.txt -img carrier.png -out hidden.png
+./cryptoguard steg-embed -p "mypassword" --in secret.txt --img carrier.png --out hidden.png
 ```
 - Encrypts the file or text content
 - Embeds it into carrier.png using least significant bits (LSBs)
@@ -99,7 +100,7 @@ go build -o cryptoguard
 
 ### 🖼️ Extract and Decrypt from a PNG
 ```bash
-./cryptoguard steg-extract -p "mypassword" -img hidden.png --out decrypted.txt
+./cryptoguard steg-extract -p "mypassword" --img hidden.png --out decrypted.txt
 ```
 - Extracts hidden encrypted message
 - Decrypts it using your password

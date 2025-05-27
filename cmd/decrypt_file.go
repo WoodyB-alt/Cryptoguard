@@ -1,35 +1,44 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/WoodyB-alt/cryptoguard/internal/crypto"
+	"github.com/spf13/cobra"
 )
 
-// DecryptFile is the CLI handler for decrypting a file using AES.
-// Usage: cryptoguard decrypt-file -p "password" input.enc output.txt
-func DecryptFile(args []string) {
-	// Define and parse the flag set for this command
-	fs := flag.NewFlagSet("decrypt-file", flag.ExitOnError)
-	password := fs.String("p", "", "Password for decryption")
-	fs.Parse(args)
+var decryptFilePassword string
 
-	// Ensure input and output file paths are provided
-	if fs.NArg() < 2 {
-		fmt.Println("Usage: cryptoguard decrypt-file -p \"password\" input.enc output.txt")
-		return
-	}
+// decryptFileCmd represents the Cobra CLI command to decrypt a file using AES-GCM
+var decryptFileCmd = &cobra.Command{
+	Use:   "decrypt-file [input.enc] [output.txt]",
+	Short: "Decrypt a file encrypted with AES-GCM",
+	Args:  cobra.ExactArgs(2), // Expect exactly 2 arguments: input path and output path
+	Run: func(cmd *cobra.Command, args []string) {
+		inputPath := args[0]  // Encrypted input file (e.g., "secret.enc")
+		outputPath := args[1] // Destination file for decrypted content (e.g., "secret.txt")
 
-	inputPath := fs.Arg(0)
-	outputPath := fs.Arg(1)
+		if decryptFilePassword == "" {
+			fmt.Println("Error: password is required. Use -p flag.")
+			return
+		}
 
-	// Call the decryption function from the crypto package
-	err := crypto.DecryptFile(inputPath, outputPath, *password)
-	if err != nil {
-		fmt.Println("Decryption error:", err)
-		return
-	}
+		// Perform decryption using the crypto package
+		err := crypto.DecryptFile(inputPath, outputPath, decryptFilePassword)
+		if err != nil {
+			fmt.Println("Decryption error:", err)
+			return
+		}
 
-	fmt.Println("File decrypted successfully:", outputPath)
+		fmt.Println("File decrypted successfully:", outputPath)
+	},
+}
+
+func init() {
+	// Register the -p / --password flag for decryption
+	decryptFileCmd.Flags().StringVarP(&decryptFilePassword, "password", "p", "", "Password for decryption (required)")
+	decryptFileCmd.MarkFlagRequired("password")
+
+	// Add this command to the root command
+	rootCmd.AddCommand(decryptFileCmd)
 }

@@ -1,34 +1,44 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/WoodyB-alt/cryptoguard/internal/crypto"
+	"github.com/spf13/cobra"
 )
 
-func Decrypt(args []string) {
-	// Define flag set for the decrypt command
-	fs := flag.NewFlagSet("decrypt", flag.ExitOnError)
-	password := fs.String("p", "", "Password for decryption")
-	fs.Parse(args)
+var decryptPassword string
 
-	// Get the ciphertext string to decrypt
-	cipherText := fs.Arg(0)
+// decryptCmd defines the "decrypt" CLI command for decrypting base64-encoded AES-GCM ciphertext.
+var decryptCmd = &cobra.Command{
+	Use:   "decrypt [ciphertext]",
+	Short: "Decrypt a base64-encoded AES-GCM string",
+	Args:  cobra.ExactArgs(1), // Requires exactly one ciphertext argument
+	Run: func(cmd *cobra.Command, args []string) {
+		cipherText := args[0]
 
-	// Ensure both ciphertext and password are provided
-	if *password == "" || cipherText == "" {
-		fmt.Println("Usage: cryptoguard decrypt \"cipherText\" -p \"password\"")
-		return
-	}
+		if decryptPassword == "" {
+			fmt.Println("Error: password is required. Use -p flag.")
+			return
+		}
 
-	// Decrypt the ciphertext using AES
-	plainText, err := crypto.DecryptAES(cipherText, *password)
-	if err != nil {
-		fmt.Println("Decryption error:", err)
-		return
-	}
+		// Call internal decryption logic
+		plainText, err := crypto.DecryptAES(cipherText, decryptPassword)
+		if err != nil {
+			fmt.Println("Decryption error:", err)
+			return
+		}
 
-	// Output the result
-	fmt.Println(plainText)
+		// Output the result
+		fmt.Println(plainText)
+	},
+}
+
+func init() {
+	// Bind -p / --password flag
+	decryptCmd.Flags().StringVarP(&decryptPassword, "password", "p", "", "Password used for decryption")
+	decryptCmd.MarkFlagRequired("password")
+
+	// Register command with root
+	rootCmd.AddCommand(decryptCmd)
 }
