@@ -28,7 +28,7 @@ func Execute() {
 
 // printBanner prints the ASCII logo and CLI info
 func printBanner() {
-	fmt.Println(`
+	fmt.Print(`
 	/$$$$$$                                  /$$                                                           /$$
 	/$$__  $$                                | $$                                                          | $$
 	| $$  \__/  /$$$$$$  /$$   /$$  /$$$$$$  /$$$$$$    /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$   /$$$$$$  /$$$$$$$
@@ -40,7 +40,6 @@ func printBanner() {
 						/$$  | $$| $$                           /$$  \ $$
 						|  $$$$$$/| $$                          |  $$$$$$/
 						\______/ |__/                           \______/      🔐
-
  Secure AES-256 CLI Encryption Tool by Blake Wood
  https://github.com/WoodyB-alt/cryptoguard
 `)
