@@ -12,10 +12,8 @@ var rootCmd = &cobra.Command{
 	Short: "Cryptoguard 🔐 - AES-256 encryption & steganography CLI tool",
 	Long: `Cryptoguard is a secure AES-GCM encryption tool for files, folders, and text.
 It includes support for steganography, zipping, and password-based protection.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		printBanner() // ✅ Always print banner when *any* command or root is run
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		printBanner()
 		cmd.Help() // fallback to help
 	},
 }

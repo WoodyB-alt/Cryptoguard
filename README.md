@@ -126,7 +126,5 @@ go build -o cryptoguard
 
 - Always use strong, unique passwords — encryption strength depends on it
 
-
-
 ## 🧑‍💻 Author
 - Blake Wood — 2024 Cybersecurity CLI Project
